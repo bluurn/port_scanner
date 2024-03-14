@@ -47,7 +47,7 @@ impl Config {
         Ok(Config {
             help: false,
             ipaddr,
-            threads: 4,
+            threads: 16,
         })
     }
 }
