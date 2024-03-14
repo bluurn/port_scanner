@@ -49,7 +49,7 @@ fn run(config: port_scanner::Config) {
         open_ports.push(received);
     });
 
-    println!("Opened ports for {}:\n", config.ipaddr);
+    println!("Opened ports:");
 
     open_ports.into_iter().for_each(|port| println!("{}", port));
 }
@@ -58,7 +58,7 @@ fn scan_port(tx: Sender<u16>, thread_num: u16, ipaddr: IpAddr, thread_count: u16
     let max_port = 65535;
     let mut curr_port = thread_num;
 
-    while max_port - curr_port > thread_count {
+    while max_port - curr_port >= thread_count {
         if TcpStream::connect((ipaddr, curr_port)).is_ok() {
             tx.send(curr_port).unwrap();
         }
