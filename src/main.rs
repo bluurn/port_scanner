@@ -21,6 +21,7 @@ fn main() {
 
     if config.help {
         print_usage();
+        exit(0);
     }
 
     run(config);
