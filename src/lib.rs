@@ -8,6 +8,7 @@ use std::{
 pub struct Config {
     pub help: bool,
     pub ipaddr: IpAddr,
+    pub threads: u16,
 }
 
 #[derive(Debug)]
@@ -20,7 +21,7 @@ impl Display for ConfigError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             ConfigError::BadLen => write!(f, "Bad length"),
-            ConfigError::BadIp(err) => write!(f, "Bad ip address: {}", err),
+            ConfigError::BadIp(err) => write!(f, "Bad IP address: {}", err),
         }
     }
 }
@@ -37,6 +38,7 @@ impl Config {
             return Ok(Config {
                 help: true,
                 ipaddr: IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)),
+                threads: 0,
             });
         }
 
@@ -45,6 +47,7 @@ impl Config {
         Ok(Config {
             help: false,
             ipaddr,
+            threads: 4,
         })
     }
 }
