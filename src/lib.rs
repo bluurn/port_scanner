@@ -1,6 +1,7 @@
 use std::{
     fmt::Display,
     net::{AddrParseError, IpAddr, Ipv4Addr},
+    num::ParseIntError,
     str::FromStr,
 };
 
@@ -15,6 +16,10 @@ pub struct Config {
 pub enum ConfigError {
     BadLen,
     BadIp(AddrParseError),
+    BadFlag(String),
+    BadThreads(u16),
+    BadThreadConversion(ParseIntError),
+    NoThreads,
 }
 
 impl Display for ConfigError {
@@ -22,6 +27,12 @@ impl Display for ConfigError {
         match self {
             ConfigError::BadLen => write!(f, "Bad length"),
             ConfigError::BadIp(err) => write!(f, "Bad IP address: {}", err),
+            ConfigError::BadFlag(val) => write!(f, "Unknown flag: {}", val),
+            ConfigError::BadThreads(val) => write!(f, "Bad threads value: {}", val),
+            ConfigError::NoThreads => write!(f, "No threads value provided"),
+            ConfigError::BadThreadConversion(err) => {
+                write!(f, "Cannot convert threads value {}", err)
+            }
         }
     }
 }
@@ -44,10 +55,32 @@ impl Config {
 
         let ipaddr = IpAddr::from_str(&fst_arg).map_err(ConfigError::BadIp)?;
 
+        if let Some(threads_flag) = args.next() {
+            if threads_flag.eq("-j") || threads_flag.eq("--threads") {
+                let Some(threads_str) = args.next() else {
+                    return Err(ConfigError::NoThreads);
+                };
+                let threads: u16 = threads_str
+                    .parse::<u16>()
+                    .map_err(ConfigError::BadThreadConversion)?;
+
+                if threads == 0 {
+                    return Err(ConfigError::BadThreads(threads));
+                }
+
+                return Ok(Config {
+                    help: false,
+                    ipaddr,
+                    threads,
+                });
+            }
+            return Err(ConfigError::BadFlag(threads_flag));
+        }
+
         Ok(Config {
             help: false,
             ipaddr,
-            threads: 16,
+            threads: 4,
         })
     }
 }
