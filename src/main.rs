@@ -1,12 +1,6 @@
 use port_scanner::config;
-use std::{net::IpAddr, process::exit};
+use std::process::exit;
 use tokio::{net::TcpStream, sync::mpsc};
-
-async fn scan_port(tx: mpsc::Sender<u16>, ipaddr: IpAddr, port: u16) {
-    if TcpStream::connect((ipaddr, port)).await.is_ok() {
-        tx.send(port).await.unwrap();
-    }
-}
 
 #[tokio::main]
 async fn main() {
@@ -18,12 +12,14 @@ async fn main() {
     }
 
     let mut open_ports: Vec<u16> = vec![];
-    let (tx, mut rx) = mpsc::channel::<u16>(100);
+    let (tx, mut rx) = mpsc::channel::<u16>(50);
 
     for port in args.min_port..=args.max_port {
         let tx = tx.clone();
         tokio::spawn(async move {
-            scan_port(tx, args.ipaddr, port).await;
+            if (TcpStream::connect((args.ipaddr, port)).await).is_ok() {
+                tx.send(port).await.unwrap();
+            };
         });
     }
 
