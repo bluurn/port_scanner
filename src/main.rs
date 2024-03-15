@@ -29,6 +29,8 @@ async fn main() {
         open_ports.push(port);
     }
 
+    open_ports.sort();
+
     println!("Opened ports:");
     for port in open_ports.into_iter() {
         println!("{}", port)
