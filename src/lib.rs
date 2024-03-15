@@ -13,7 +13,7 @@ pub struct Config {
     /// IPv4 address, defaults to 127.0.0.1
     pub ipaddr: IpAddr,
 
-    #[bpaf(short, long, fallback(MAX_PORT), guard(gtzero, "must be > 0"))]
+    #[bpaf(short('M'), long, fallback(MAX_PORT), guard(gtzero, "must be > 0"))]
     /// Maximal port, defaults to 65535
     pub max_port: u16,
 
