@@ -1,50 +1,40 @@
-use std::{
-    net::TcpStream,
-    sync::mpsc::{channel, Sender},
-    thread,
-};
-
 use port_scanner::config;
+use std::{net::IpAddr, process::exit};
+use tokio::{net::TcpStream, sync::mpsc};
 
-fn run(config: port_scanner::Config) {
+async fn scan_port(tx: mpsc::Sender<u16>, ipaddr: IpAddr, port: u16) {
+    if TcpStream::connect((ipaddr, port)).await.is_ok() {
+        tx.send(port).await.unwrap();
+    }
+}
+
+#[tokio::main]
+async fn main() {
+    let args = config().run();
+
+    if args.min_port >= args.max_port {
+        eprintln!("Min port should be less than max port!");
+        exit(1);
+    }
+
     let mut open_ports: Vec<u16> = vec![];
-    let (tx, rx) = channel::<u16>();
+    let (tx, mut rx) = mpsc::channel::<u16>(100);
 
-    for thread_num in 0..config.threads {
+    for port in args.min_port..=args.max_port {
         let tx = tx.clone();
-        let cfg = config.clone();
-        thread::spawn(move || {
-            scan_port(tx, thread_num, cfg);
+        tokio::spawn(async move {
+            scan_port(tx, args.ipaddr, port).await;
         });
     }
 
     drop(tx);
 
-    for received in rx.into_iter() {
-        open_ports.push(received);
+    while let Some(port) = rx.recv().await {
+        open_ports.push(port);
     }
 
     println!("Opened ports:");
-
     for port in open_ports.into_iter() {
         println!("{}", port)
     }
-}
-
-fn scan_port(tx: Sender<u16>, thread_num: u16, config: port_scanner::Config) {
-    let max_port = 65535;
-    let mut curr_port = thread_num;
-
-    while max_port - curr_port >= config.threads {
-        if TcpStream::connect((config.ipaddr, curr_port)).is_ok() {
-            tx.send(curr_port).unwrap();
-        }
-        curr_port += config.threads;
-    }
-}
-
-fn main() {
-    let args = config().run();
-
-    run(args);
 }
