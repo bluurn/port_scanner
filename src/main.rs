@@ -1,17 +1,10 @@
 use std::{
-    env,
     net::TcpStream,
-    process::exit,
     sync::mpsc::{channel, Sender},
     thread,
 };
 
-fn print_usage() {
-    let prg_name = env::args().next().unwrap_or("prog_name".to_string());
-    println!("Usage: {} -h or --help to print help", prg_name);
-    println!("{} 127.0.0.1 to scan ports", prg_name);
-    println!("{} 127.0.0.1 -j 8 to scan ports with 8 threads", prg_name);
-}
+use port_scanner::config;
 
 fn run(config: port_scanner::Config) {
     let mut open_ports: Vec<u16> = vec![];
@@ -51,16 +44,7 @@ fn scan_port(tx: Sender<u16>, thread_num: u16, config: port_scanner::Config) {
 }
 
 fn main() {
-    let config = port_scanner::Config::build(env::args()).unwrap_or_else(|err| {
-        eprintln!("Failed to parse arguments: {}", err);
-        print_usage();
-        exit(1);
-    });
+    let args = config().run();
 
-    if config.help {
-        print_usage();
-        exit(0);
-    }
-
-    run(config);
+    run(args);
 }
