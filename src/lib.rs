@@ -5,7 +5,7 @@ use std::{
     str::FromStr,
 };
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Config {
     pub help: bool,
     pub ipaddr: IpAddr,

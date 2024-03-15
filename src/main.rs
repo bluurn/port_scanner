@@ -1,6 +1,6 @@
 use std::{
     env,
-    net::{IpAddr, TcpStream},
+    net::TcpStream,
     process::exit,
     sync::mpsc::{channel, Sender},
     thread,
@@ -19,31 +19,32 @@ fn run(config: port_scanner::Config) {
 
     for thread_num in 0..config.threads {
         let tx = tx.clone();
+        let cfg = config.clone();
         thread::spawn(move || {
-            scan_port(tx, thread_num, config.ipaddr, config.threads);
+            scan_port(tx, thread_num, cfg);
         });
     }
 
     drop(tx);
 
-    rx.into_iter().for_each(|received| {
+    for received in rx.into_iter() {
         open_ports.push(received);
-    });
+    }
 
     println!("Opened ports:");
 
     open_ports.into_iter().for_each(|port| println!("{}", port));
 }
 
-fn scan_port(tx: Sender<u16>, thread_num: u16, ipaddr: IpAddr, thread_count: u16) {
+fn scan_port(tx: Sender<u16>, thread_num: u16, config: port_scanner::Config) {
     let max_port = 65535;
     let mut curr_port = thread_num;
 
-    while max_port - curr_port >= thread_count {
-        if TcpStream::connect((ipaddr, curr_port)).is_ok() {
+    while max_port - curr_port >= config.threads {
+        if TcpStream::connect((config.ipaddr, curr_port)).is_ok() {
             tx.send(curr_port).unwrap();
         }
-        curr_port += thread_count;
+        curr_port += config.threads;
     }
 }
 
