@@ -33,7 +33,9 @@ fn run(config: port_scanner::Config) {
 
     println!("Opened ports:");
 
-    open_ports.into_iter().for_each(|port| println!("{}", port));
+    for port in open_ports.into_iter() {
+        println!("{}", port)
+    }
 }
 
 fn scan_port(tx: Sender<u16>, thread_num: u16, config: port_scanner::Config) {
