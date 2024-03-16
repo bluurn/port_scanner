@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 bpaf = {version = "0.7", features = ["derive", "bright-color"]}
 tokio = { version = "1", features = ["full"] }
+indicatif = { version = "0.17"}

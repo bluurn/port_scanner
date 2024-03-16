@@ -1,3 +1,4 @@
+use indicatif::ProgressBar;
 use port_scanner::config;
 use std::process::exit;
 use tokio::{net::TcpStream, sync::mpsc};
@@ -14,8 +15,10 @@ async fn main() {
     let mut open_ports: Vec<u16> = vec![];
     let (tx, mut rx) = mpsc::channel::<u16>(50);
 
+    let pb = ProgressBar::new(args.max_port.into());
     for port in args.min_port..=args.max_port {
         let tx = tx.clone();
+        pb.tick();
         tokio::spawn(async move {
             if (TcpStream::connect((args.ipaddr, port)).await).is_ok() {
                 tx.send(port).await.unwrap();
@@ -30,6 +33,7 @@ async fn main() {
     }
 
     open_ports.sort();
+    pb.finish_and_clear();
 
     println!("Opened ports:");
     for port in open_ports.into_iter() {
