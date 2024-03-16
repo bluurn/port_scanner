@@ -13,6 +13,8 @@ pub struct Message {
 #[derive(Debug, Clone, Bpaf)]
 #[bpaf(options, version)]
 /// Accepts IPv4 address and number of threads
+/// If you want to print the processes list for localhost, run
+/// lsof -i :$(port_scanner | tail -n +2 | tr '\n' ',')
 pub struct Config {
     #[bpaf(short, long, fallback(IpAddr::V4(DEFAULT_IP)))]
     /// IPv4 address, defaults to 127.0.0.1
