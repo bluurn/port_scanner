@@ -3,8 +3,10 @@
 to run, use:
 
 ```shell
-port_scanner --help
+> port_scanner -h
 Accepts IPv4 address and number of threads
+If you want to print the processes list for localhost, run
+lsof -i :$(port_scanner | tail -n +2 | tr '\n' ',')
 
 Usage: [-i ARG] [-M ARG] [-m ARG]
 
