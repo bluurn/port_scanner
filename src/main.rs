@@ -35,7 +35,7 @@ async fn main() {
     open_ports.sort();
     pb.finish_and_clear();
 
-    println!("Opened ports:");
+    println!("Opened ports for {}:", args.ipaddr);
     for port in open_ports.into_iter() {
         println!("{}", port)
     }
