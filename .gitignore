@@ -1,1 +1,14 @@
-/target
+/target/
+
+result
+result-*
+
+.direnv/
+
+.env
+.env.*
+!.env.example
+
+.DS_Store
+.idea/
+.vscode/
